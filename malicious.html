@@ -6,6 +6,7 @@
 	if (window.opener) {
 		opener.location = 'https://mathiasbynens.github.io/rel-noopener/#hax';
 		// Just `opener.location.hash = '#hax'` only works on the same origin.
+		console.log("cookie = " + window.opener.document.cookie);
 	} else {
 		document.querySelector('h1').innerHTML = 'The previous tab is safe and intact. <code>window.opener</code> was <code>null</code>; mischief <em>not</em> managed!';
 	}
