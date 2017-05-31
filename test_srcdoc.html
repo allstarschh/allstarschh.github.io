@@ -1,0 +1,22 @@
+<!doctype html>
+<html>
+<head>
+<title>Test calling document,write in srcdoc when onload is called </title>
+
+<script>
+window.onload = function() {
+
+};
+
+</script>
+</head>
+<body>
+
+<iframe id="pframe1" name="pframe1" srcdoc="<script>console.log('doing open1.');document.open();console.log('open1 succeeds.');</script>"></iframe>
+<iframe id="pframe2" name="pframe2" srcdoc="<script>window.onload=function(){document.open();console.log('open2 succeeds');};</script>"></iframe>
+<iframe id="pframe3" name="pframe3" src="test.html"></iframe>
+<iframe id="pframe4" name="pframe4" srcdoc="<script>window.onload=function(){var iframe=parent.document.getElementById('pframe3'); var doc = iframe.contentDocument; doc.open();console.log('open4 '+doc.documentURI);};</script>"></iframe>
+<iframe id="pframe5" name="pframe5" srcdoc="<script>window.onload=function(){var iframe=parent.document.getElementById('pframe1'); var doc = iframe.contentDocument; doc.open();console.log('open5 '+doc.documentURI);};</script>"></iframe>
+
+</body>
+</html>
