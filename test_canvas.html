@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test if data:image/png is same origin</title>
+</head>
+<body>
+<canvas id="canvas" class="output" width="100" height="50">
+
+<script>
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+ctx.fillRect(0, 0, 100, 50);
+ctx.fillStyle = '#000';
+
+var img = new Image();
+var data = canvas.toDataURL('image/png');
+img.onload = function () {
+  console.log("img onload");
+  ctx.drawImage(img, 0, 0);
+  var pixel = ctx.getImageData(0, 0, 1, 1);
+  console.log("img onload exit");
+};
+console.log("data URL="+data+"\n");
+img.src = data;
+</script>
+</body>
+</html>
