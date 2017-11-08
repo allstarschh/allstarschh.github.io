@@ -4,7 +4,7 @@
       var img = new Image(-256, 1024);
       img.src = 'data:;base64,R0lGODlhAQABAAAAACwAAAAAAQABAAA';
       img.onload = function () {
-        document.appendChild(img);
+        document.body.appendChild(img);
         img.crossOrigin ="Anonymous";
         document.implementation.createDocument('', '', null).adoptNode(img);
       };
