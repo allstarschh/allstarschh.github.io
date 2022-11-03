@@ -169,6 +169,7 @@ import app from "app.mjs"; // Will import "/js/app-1.mjs"
 import app from "app.mjs"; // Will import "/js/app-2.mjs"
 ```
 
+---
 ## Explanation in depth
 Let's explain the terms first.
 The string literal "app.mjs" in the above examples is called *[Module Specifier]* in ECMA Script.
@@ -323,6 +324,7 @@ in the future:
 - Import-maps won't be processed if the module loading has been started.
 - Not supported for workers/worklets. See [issue 2].
 
+---
 ## Common problems when using import-maps
 There are some common problems when you use Import-maps **incorrectly**:
 - Invalid JSON format
@@ -341,6 +343,8 @@ tag needs to be loaded **before** any module load happens, which includes:
   - See the '**Resolution precedence**' part above, and check if there is another specifier key
 which takes higher precedence than the specifier key you thought.
 
+
+---
 ## Why do we intentionally delay the feature 'Import-maps'?
 At first, Import-maps was an incubated feature proposed by a web community group
 called [WICG], which is different than other web standard organizations like
@@ -356,9 +360,11 @@ so Mozilla started to implement this feature a while ago, see
 It was only recently that [import-maps] has been officially
 [merged into HTML spec], therefore we've decided to ship it until now.
 
+---
 ## Specification link
 The specification could be found in [import-maps].
 
+---
 ## Acknowledgments
 Many thanks to [Jon Coppeard], [Yulia Startsev], and [Tooru Fujisawa] for their
 contributions to the modules implementations and those code reviews on the Import-maps
