@@ -5,47 +5,45 @@ date: 2022-11-01 00:00:00 -0000
 categories: import-maps
 ---
 
-## Introduction to Javascript Import-Maps
-Import-maps is a popular feature that is used by the community. It has been supported
-for a while in Google Chrome. Now Firefox has also implemented this feature, as
-Import-maps officially becomes a web standard recently. Let's explain what's
-Import-maps and how you should use it in your web apps.
+## Introduction to Import-Maps
+Let's explain what's Import-maps and how you should use it in your web apps.
 
 ### Module Specifier remapping
-People familiar with Javascript modules should also know that you could [import
-objects from other Javascript modules], or do a [dynamic import] in your script.
-For example:
+If you are familiar with JavaScript modules, then you are probably familiar with
+ [static] and [dynamic imports] in your script.
+As a quick refresher for anyone who is new:
 
 ```
-// In a module script. Do a static import.
+// In a module script you can do a static import like so.
 import moment from "/node_modules/moment/src/moment.js";
 ```
 ```
-// In a Javascript script. Do a dynamic import.
+// In a classic or a module script, you can do a dynamic import like so.
 import("/node_modules/moment/src/moment.js");
 ```
 
-Notice that in the both imports, you need to provide a string literal with either the absolute
-path or the relative path of the module script, so the Javascript engine could
-know where the module script is located.
+Notice that in both imports, you need to provide a string literal with either
+the absolute path or the relative path of the module script, so the browser
+knows where the module script is located.
 
-But with Import-maps, you could just do
+However, with Import-maps, the following is now possible:
 
 ```
 // In a module script.
 import moment from "moment";
 ```
 ```
-// In a Javascript script.
+// In a classic or module script.
 import("moment");
 ```
 
 Notice the path has been replaced by a [Module specifier] called "moment".
-But the Javascript engine still needs to know the location of the module script.
-This is the part "Import-maps" comes into play.
+But the browser still needs to know the location of the module script.
+This is where "Import-maps" comes into play.
 
-In the HTML document[^1], you could provide a script tag whose type is "**importmap**",
-with a JSON string, which is a JSON object that maps the module specifier into the URL.
+To create an import map, you need to add a script tag whose type is
+"**importmap**" to your HTML document[^1]. The body of the script tag is a JSON
+object that maps the module specifier into the URL.
 
 ```
 <!-- In the HTML document -->
@@ -58,20 +56,30 @@ with a JSON string, which is a JSON object that maps the module specifier into t
 </script>
 ```
 
-So when the Javascript engine tries to resolve the *Module Specifier* "moment",
-it will check the Import-map in the HTML document and try to get the corresponding
-URL of the module specifier.
+When the browser tries to resolve a *Module Specifier*,
+it will check if an Import-map exists in the HTML document and try to get the corresponding
+URL of the module specifier. If it doesn’t find one, it will try to resolve the
+specifier as a URL.
 
 
-In this case, it will try to find the entry whose key is "moment", and get the
+In our example with the "moment" library, it will try to find the entry whose key is "moment", and get the
 value "/node_modules/moment/src/moment.js" from the Import-map.
 
-This trick could be extended a little bit with file hashes. For example, sometimes you need to
-cache the module scripts and let's say the file name will be appended with the hash of
+What about more complex use cases? For example, browsers provide caching for
+all files with the same name, so your websites will load faster. But what if we
+update our module? In this case we would have to do “cache busting”. That is, we
+rename the file we are loading. The name will be appended with the hash of
 the file's content. In the above example, moment.js could become moment-1234abcd.js,
 where the "1234abcd" is the hash number of the content of moment.js.
 
-Instead of modifying all the files that would import the cached module script,
+```
+// Static import
+import moment from "/node_modules/moment/src/moment-1234abcd.js";
+
+// Dynamic import
+import("/node_modules/moment/src/moment-1234abcd.js");
+```
+This is quite a pain to do by hand! Instead of modifying all the files that would import the cached module script,
 you could use Import-maps to keep track of the hashed module script.
 
 ```
@@ -150,7 +158,7 @@ specific mapping table according to the URL of the module script. For example,
 ```
 
 
-Here the *scopes* map has two entries:
+In this example, the *scopes* map has two entries:
 1. "/foo/" -> *Module specifier map 1*
 2. "/bar/" -> *Module specifier map 2*
 
@@ -172,8 +180,8 @@ import app from "app.mjs"; // Will import "/js/app-2.mjs"
 ---
 ## Explanation in depth
 Let's explain the terms first.
-The string literal "app.mjs" in the above examples is called *[Module Specifier]* in ECMA Script.
-And the map which maps "app.mjs" to a URL is called *[Module Specifier Map]*.
+The string literal "app.mjs" in the above examples is called *[Module Specifier]* in ECMA-Script,
+and the map which maps "app.mjs" to a URL is called *[Module Specifier Map]*.
 
 An import map is an object with two optional items:
 - **_imports_**, which is a *module specifier map*.
@@ -183,7 +191,7 @@ So an import map could be thought of as:
 - A top-level module specifier map called "**_imports_**".
 - A map of module specifier maps, which is called "**_scopes_**", that could override the top-level module specifier map according to the location of the referrer.
 
-Put it into a graph
+If we put it into a graph
 
 ```
 Module Specifier Map:
@@ -214,7 +222,7 @@ The format of the import map text has some requirements:
 - The *imports* and *scopes* must be JSON objects as well.
 - The values in *scopes* must be JSON objects since they should be the type of *Module Specifier Maps*.
 
-Failing to meet anyone of the above requirements will fail to parse the import map,
+Failing to meet anyone of the above requirements will result a failure to parse the import map,
 and a **SyntaxError**/**TypeError** will be thrown.[^2]
 
 ```
@@ -246,8 +254,8 @@ window.onerror = (e) => {
 After the validation of JSON is done, the parsing of the import map will check
 whether the values(URLs) in the Module specifier maps are valid.
 
-If there's any invalid URL, the value of the entry in the module specifier map
-will be marked as invalid. Later when the Javascript engine is trying to resolve
+If the map contains an invalid URL, the value of the entry in the module specifier map
+will be marked as invalid. Later when the browser is trying to resolve
 the module specifier, if the resolution result is the invalid value, the
 resolution will fail and throw a **TypeError**.
 
@@ -271,7 +279,7 @@ import("foo").catch((err) => {
 ```
 
 ### Resolution precedence
-When the Javascript engine is trying to resolve the module specifier, it will
+When the browser is trying to resolve the module specifier, it will
 find out the most specific *Module Specifier Map* to use, depending on the URL
 of the referrer.
 
@@ -301,16 +309,16 @@ specifier, provided the key ends with a trailing slash '/'.
 ```
 
 ```
-// In a Javascript module script.
+// In a module script.
 import foo from "a/b/c.js"; // will import "/js/dir/b/c.js"
 ```
 
-Notice although the first entry "a/" in the import map could be used to resolve "a/b/c.js",
+Notice that although the first entry "a/" in the import map could be used to resolve "a/b/c.js",
 however, there is a better match below "a/b/" since it has a longer common prefix
 of the module specifier. So "a/b/c.js" will be resolved to "js/dir/b/c.js", instead
 of "/js/test/a/b/c.js".
 
-Details could be found in [resolve a module specifier].
+Details can be found in [resolve a module specifier].
 
 ### Limitations of Import-maps
 Currently, there are some limitations of the Import-maps, but these may be lifted
@@ -345,24 +353,28 @@ which takes higher precedence than the specifier key you thought.
 
 
 ---
-## Why do we intentionally delay the feature 'Import-maps'?
-At first, Import-maps was an incubated feature proposed by a web community group
-called [WICG], which is different than other web standard organizations like
-[WHATWG] or [TC39]. And the feature was initiated by Google so they decided to
+## Chrome shipped this ages ago! What took you so long?
+Mozilla started to implement this feature a while ago, see
+[Intent to Prototype: Import-maps], but this feature was turned off by default.
+At first, Import-maps was an incubated feature proposal in a web community group
+called [WICG]. This is different than a standards organizations like [WHATWG] or
+[ECMA International]. The feature was initiated by Google so they decided to
 ship [Import-maps in Chrome 89]. But it was not a web standard yet so other Browser
-vendors didn't implement this feature at that time.
+vendors didn't prioritize implementing this feature at that time.
 
-But this feature is getting more and more popular, and Mozilla is also getting more
-and more requests/inquiries from web developers and web communities. After
-discussing with Google, they are willing to push this feature into a web standard,
-so Mozilla started to implement this feature a while ago, see
-[Intent to Prototype: Import-maps]. But this feature was turned off by default.
-It was only recently that [import-maps] has been officially
-[merged into HTML spec], therefore we've decided to ship it until now.
+
+Import maps presented an important stepping stone for making the authoring of
+the web more accessible. We also heard the many requests/inquiries from web
+developers who were interested in seeing this feature land for similar reasons.
+After discussing with Google, they agreed to finish this feature and publich it
+as a web standard. Recently, the last work to integrate it into the specification
+was finished, and [import-maps] has been officially [merged into HTML spec].
+With this, we shipped Import-maps unflagged.
+
 
 ---
 ## Specification link
-The specification could be found in [import-maps].
+The specification can be found in [import-maps].
 
 ---
 ## Acknowledgments
@@ -375,8 +387,8 @@ coordinate this project.
 TODO: Add people who help to review this post
 
 
-[import objects from other Javascript modules]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules#importing_features_into_your_script
-[dynamic import]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
+[static]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/import
+[dynamic imports]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/import
 [Module specifier]: https://tc39.es/ecma262/#prod-ModuleSpecifier
 [Module Specifier Map]: https://html.spec.whatwg.org/multipage/webappapis.html#module-specifier-map
 [resolve a module specifier]: https://html.spec.whatwg.org/multipage/webappapis.html#resolve-a-module-specifier
@@ -385,7 +397,7 @@ TODO: Add people who help to review this post
 [Import-maps in Chrome 89]: https://chromestatus.com/feature/5315286962012160
 [WICG]: https://wicg.io/
 [WHATWG]: https://whatwg.org/
-[TC39]: https://tc39.es/
+[ECMA International]: https://www.ecma-international.org/
 [Intent to Prototype: Import-maps]: https://groups.google.com/a/mozilla.org/g/dev-platform/c/tiReRwpIT30
 [merged into HTML spec]: https://github.com/whatwg/html/pull/8075
 [import-maps]: https://html.spec.whatwg.org/multipage/webappapis.html#import-maps
