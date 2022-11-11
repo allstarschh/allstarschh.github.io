@@ -54,7 +54,7 @@ Detailed can be found in [Node.js v4.x modules documentation].
 And later when ECMAScript Modules were merged into HTML, they decided only
 relative URLs and absolute URLs were allowed, bare specifiers were excluded at
 that time, see [HTML PR 443]. Because bare specifiers could have some security 
-concerns and would require more complex design in web standards.
+concerns and would require a more complex design in web standards.
 
 After ECMAScript Modules becomes an official standard, now Node.js also wanted
 to implement that, so Node.js added ESM modules implementation in
