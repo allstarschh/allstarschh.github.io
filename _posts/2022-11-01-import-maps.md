@@ -48,6 +48,7 @@ When Node.js 4.x was released, it had its own module system called
 - Using a core module name, like require("http")
 - Using file modules.
 - Using folders as modules.
+
 Detailed can be found in [Node.js v4.x modules documentation].
 
 And later when ECMAScript Modules were merged into HTML, they decided only
